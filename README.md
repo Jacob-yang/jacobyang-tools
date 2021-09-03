@@ -57,7 +57,7 @@
         
             @GetMapping(value = "/download")
             public void download(HttpServletResponse response, String url) {
-                minioUtils.downloadFile(response,url);
+                 minioUtils.downloadFile(response.getOutputStream(),url);
             }
        }
         ```
