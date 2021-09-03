@@ -15,12 +15,8 @@ import io.minio.PutObjectOptions;
 import io.minio.errors.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
+
+import java.io.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -133,7 +129,7 @@ public class MinioUtils {
         return false;
     }
 
-    public void downloadFile(HttpServletResponse response, String url) {
+    public void downloadFile(OutputStream responseOutputStream, String url) {
         if(StrUtil.isEmpty(url)){
             log.error("url is null");
             return;
@@ -143,10 +139,8 @@ public class MinioUtils {
         try {
             if(ObjectUtil.isNotNull(minioFile)){
                 String bucket= minioFile.getBucket();
-                response.setHeader("Content-Disposition", "attachment;filename=" +
-                        URLEncoder.encode(minioFile.getObjectName(),"UTF-8"));
                 inputStream = minioClient.getObject(StrUtil.isEmpty(bucket)?baseBucket:bucket,minioFile.getObjectName());
-                IoUtil.copy(inputStream,response.getOutputStream());
+                IoUtil.copy(inputStream,responseOutputStream);
             }
             log.error("minioFile is null");
         } catch (ErrorResponseException | InsufficientDataException |InternalException|InvalidBucketNameException
