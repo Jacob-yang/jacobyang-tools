@@ -1,19 +1,16 @@
 # jacobyang-tools
 ## jacobyang-tool-minio
 > 使用步骤
-  1. 在resources下创建lib文件夹
-  2. 把jacobyang-tool-minio.jar放入
-  3. 在pom.xml中配置 
+ 
+  1. 在pom.xml中配置 
         ```
-            <dependency>
-                <groupId>com.jacobyang</groupId>
-                <artifactId>jacobyang-tool-minio</artifactId>
-                <version>1.0</version>
-                <scope>system</scope>
-                <systemPath>${project.basedir}/src/main/resources/lib/jacobyang-tool-minio.jar</systemPath>
-            </dependency>
+      <dependency>
+        <groupId>com.jacobyang</groupId>
+        <artifactId>jacobyang-tool-minio</artifactId>
+        <version>1.0</version>
+      </dependency>
         ``` 
-  4. application.yml
+  2. application.yml
      ```yml
         minio:
           url: http://127.0.0.1:9000
@@ -22,7 +19,7 @@
           openUrl: http://127.0.0.1:9000
           bucket: pic
         ```      
-  5. controller使用
+  3. controller使用
      ```java
         @RestController
         @RequestMapping("/api/upload")
