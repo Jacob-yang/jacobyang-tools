@@ -8,13 +8,12 @@ import cn.hutool.core.img.ImgUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.jacobyang.config.MinioAutoConfiguration;
 import com.jacobyang.config.MinioProperties;
 import com.jacobyang.domain.MinioFile;
 import io.minio.MinioClient;
 import io.minio.PutObjectOptions;
 import io.minio.errors.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.security.InvalidKeyException;
@@ -28,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
  * @Version: 1.0
  */
 public class MinioUtils {
-    Logger log = LoggerFactory.getLogger(MinioUtils.class);
     private MinioClient minioClient;
     private String baseBucket;
     private String baseOpenUrl;
@@ -49,11 +47,10 @@ public class MinioUtils {
         try {
             boolean found = minioClient.bucketExists(bucketName);
             if (!found) {
-                log.info("Bucket {} doesn't exist, create",bucketName);
                 minioClient.makeBucket(bucketName);
             }
         } catch (Exception e) {
-            log.error(e.toString());
+            e.printStackTrace();
         }
     }
     /**
@@ -89,7 +86,7 @@ public class MinioUtils {
                 os.close();
                 miniInputStream.close();
             }
-            log.info("fileUrl:{}",fileUrl);
+            System.out.println("fileUrl:"+fileUrl);
         } catch (ErrorResponseException |InsufficientDataException |InternalException |InvalidBucketNameException
                 | InvalidKeyException |InvalidResponseException |IOException |NoSuchAlgorithmException |XmlParserException e) {
             e.printStackTrace();
@@ -124,25 +121,20 @@ public class MinioUtils {
         } catch (ErrorResponseException |InsufficientDataException |InternalException |InvalidBucketNameException
                 |InvalidKeyException |InvalidResponseException|IOException|NoSuchAlgorithmException|XmlParserException e) {
             e.printStackTrace();
-            log.error("error: {}", e.getMessage(), e);
         }
         return false;
     }
 
     public void downloadFile(OutputStream responseOutputStream, String url) {
-        if(StrUtil.isEmpty(url)){
-            log.error("url is null");
-            return;
-        }
+        MinioAutoConfiguration.notNull(StrUtil.isEmpty(url),"url is null");
         InputStream inputStream = null;
         MinioFile minioFile = getMinioFile(url);
         try {
-            if(ObjectUtil.isNotNull(minioFile)){
-                String bucket= minioFile.getBucket();
-                inputStream = minioClient.getObject(StrUtil.isEmpty(bucket)?baseBucket:bucket,minioFile.getObjectName());
-                IoUtil.copy(inputStream,responseOutputStream);
-            }
-            log.error("minioFile is null");
+            MinioAutoConfiguration.notNull(ObjectUtil.isNull(minioFile),"minioFile is null");
+
+            String bucket= minioFile.getBucket();
+            inputStream = minioClient.getObject(StrUtil.isEmpty(bucket)?baseBucket:bucket,minioFile.getObjectName());
+            IoUtil.copy(inputStream,responseOutputStream);
         } catch (ErrorResponseException | InsufficientDataException |InternalException|InvalidBucketNameException
                 |InvalidKeyException|InvalidResponseException| IOException | NoSuchAlgorithmException |XmlParserException e) {
             e.printStackTrace();
